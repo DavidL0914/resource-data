@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABA AI Resource Spreadsheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!-- CSS -->
+<style>
+  :root {
+    --ink: #0f172a;
+    --ink-soft: #64748b;
+    --paper: #f8fafc;
+    --surface: #ffffff;
+    --rule: #e2e8f0;
+    --accent: #2563eb;
+    --accent-bg: #dbeafe;
+    --green: #15803d;
+    --green-bg: #dcfce7;
+    --amber: #b45309;
+    --amber-bg: #fef3c7;
+    --radius: 14px;
+  }
+
+  * { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .header {
+    background: white;
+    border-bottom: 1px solid var(--rule);
+    padding: 18px;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .header h1 {
+    margin: 0;
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%      { opacity:0.3; transform:scale(0.7); }
+  }
+
+  .field { 
+    position: relative;
+    margin-bottom: 7px; 
+  }
+
+  .field-icon {
+    position: absolute; left: 9px; top: 50%;
+    transform: translateY(-50%);
+    color: #8888aa; pointer-events: none; font-size: 13px;
+  }
+
+  input[type="text"],
+  select {
+    width: 100%;
+    padding: 10px 12px 10px 34px;
+    background: white;
+    color: var(--ink);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    font-size: 13px;
+  }
+
+  input[type="text"]::placeholder {
+    color: #94a3b8;
+  }
+
+  input[type="text"]:focus, select:focus { 
+    border-color: rgba(91,141,245,0.7); 
+  }
+
+  select {
+    cursor: pointer; appearance: none; -webkit-appearance: none;
+    background-color: rgba(255,255,255,0.1);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 9px center; padding-right: 26px;
+  }
+
+  select option { 
+    background: #1a1a2e; 
+    color: #fff;
+  }
+
+  .filter-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 7px;
+  }
+
+  .filter-row .field {
+    flex: 1; 
+    margin-bottom: 0;
+  }
+
+  .btn-search {
+    background: #2563eb;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    box-shadow:
+      0 1px 2px rgba(0,0,0,.05),
+      0 4px 12px rgba(37,99,235,.25);
+  }
+
+  .btn-search:hover {
+    background: #2450cc;
+  }
+
+  .btn-search:active {
+    transform: scale(0.97);
+  }
+
+  .btn-search:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .active-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(45,91,227,0.25); border: 1px solid rgba(91,141,245,0.4);
+    color: #a0b8f8; border-radius: 999px;
+    padding: 3px 8px; font-size: 10px; font-weight: 600;
+    margin-top: 5px; cursor: pointer;
+  }
+
+  .active-tag:hover { 
+    background: rgba(45,91,227,0.4);
+  }
+
+  .body {
+    padding: 12px 12px 24px;
+  }
+
+  .status {
+    font-size: 10px; color: var(--ink-soft); margin-bottom: 10px;
+    letter-spacing: 0.4px; text-transform: uppercase; font-weight: 600;
+  }
+
+  .card {
+    background: white;
+    border: none;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow:
+      0 1px 2px rgba(0,0,0,.04),
+      0 8px 24px rgba(0,0,0,.05);
+    transition: all .15s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 4px 12px rgba(0,0,0,.06),
+      0 12px 32px rgba(0,0,0,.08);
+  }
+
+  .card-top {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 6px; margin-bottom: 5px;
+  }
+
+  .type-badge {
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+    padding: 2px 7px; border-radius: 999px;
+    background: var(--accent-bg); color: var(--accent);
+    white-space: nowrap; flex-shrink: 0;
+  }
+
+  .badge-Articles {
+    background:#fde8f0; 
+    color:#b52d6b;
+  }
+
+  .badge-Podcasts { 
+    background:#f0e8fd; 
+    color:#7b2db5;
+  }
+
+  .badge-Books {
+    background:#e8fde8; 
+    color:#1e7a1e; 
+  }
+
+  .badge-On-Demand-CLE { 
+    background:#fdf4e8; 
+    color:#b57a2d; 
+  }
+
+  .badge-In-Person-Events { 
+    background:#e8f4fd; color:#2d7ab5;
+  }
+
+  .badge-ReportsResolutions {
+    background:#fde8e8;
+    color:#b52d2d;
+  }
+
+  .badge-InitiativesToolkits {
+    background:#e8fdf4; 
+    color:#2db582;
+  }
+
+  .badge-Non-CLE-Video-Recordings { 
+    background:#f4e8fd;
+    color:#7a2db5; 
+  }
+
+  .paywall-badge {
+    font-size: 9px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  .paywall-yes {
+    background:var(--amber-bg); color:var(--amber);
+  }
+  
+  .paywall-no { 
+    background:var(--green-bg);
+    color:var(--green);
+  }
+
+  .card-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+
+  .card-title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .card-title a:hover {
+    text-decoration: underline;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px 7px;
+    margin-bottom: 7px;
+  }
+  
+  .meta-label {
+    font-size: 9px; 
+    font-weight: 700; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px;
+    color: var(--ink-soft); 
+    white-space: nowrap; 
+    padding-top: 1px;
+  }
+
+  .meta-value { 
+    font-size: 11px;
+    color: var(--ink);
+  }
+
+  .description {
+    font-size: 12px;
+    color: #475569;
+    line-height: 1.6;
+    border-left: none;
+    padding-left: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .tags-row {
+    display:flex;
+    flex-wrap:wrap;
+    gap:3px;
+    margin-bottom:7px;
+  }
+
+  .tag {
+    font-size: 9px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--accent-bg);
+    color: var(--accent);
+    cursor: pointer;
+    transition: background 0.15s;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .tag:hover {
+    background: #d4e0fa;
+  }
+
+  .tag.active-filter {
+    background: var(--accent);
+    color: white; 
+  }
+
+  .open-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #2563eb;
+    border: none;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .open-btn:hover {
+    background: #dbeafe;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 36px 16px;
+    color: var(--ink-soft);
+  }
+
+  .empty-state .icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .empty-state p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .loading {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:36px 16px;
+    color:var(--ink-soft);
+    gap:10px;
+  }
+
+  .spinner {
+    width:24px;
+    height:24px;
+    border: 2px solid var(--rule);
+    border-top-color: var(--accent);
+    border-radius:50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin {
+    to { 
+      transform:rotate(360deg);
+    } 
+  }
+
+  .loading p {
+    font-size:11px;
+  }
+
+  .check-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .check-label {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    transition: all 0.18s ease;
+    user-select: none;
+  }
+
+  .check-label:hover {
+    border-color: var(--accent);
+    background: #f8fbff;
+  }
+
+  .check-label input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #cbd5e1;
+    border-radius: 5px;
+    background: white;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    transition: all 0.15s ease;
+  }
+
+  .check-label input[type="checkbox"]::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    transform: scale(0);
+    transition: transform 0.15s ease;
+    border-radius: 2px;
+    background: white;
+  }
+
+  .check-label input[type="checkbox"]:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .check-label input[type="checkbox"]:checked::before {
+    transform: scale(1);
+  }
+
+  .check-label:has(input:checked) {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<div class="header-top">
+  <div>
+    <h1>ABA AI Resources Navigator</h1>
+  </div>
+</div>
+
+  <div class="field">
+    <span class="field-icon">&#8981;</span>
+    <input type="text" id="keyword"
+      placeholder="Search keyword, author, title&#8230;"
+      onkeydown="if(event.key==='Enter') runSearch()">
+  </div>
+
+  <div class="filter-row">
+    <div class="field">
+      <span class="field-icon">&#9776;</span>
+      <select id="type">
+        <option value="All">All Types</option>
+        <option>Articles</option>
+        <option>Podcasts</option>
+        <option>Books</option>
+        <option>On-Demand CLE</option>
+        <option>In-Person Events</option>
+        <option>Reports/Resolutions</option>
+        <option>Initiatives/Toolkits</option>
+        <option>Non-CLE Video Recordings</option>
+      </select>
+    </div>
+    
+    <button class="btn-search" id="searchBtn" onclick="runSearch()">Search</button>
+  </div>
+
+  <div class="filter-row" style="margin-top: 0; margin-bottom: 12px;">
+    <div class="field">
+      <span class="field-icon">&#9776;</span>
+      <select id="sponsor">
+        <option value="">All Sponsors</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="check-row">
+    <label class="check-label">
+      <input type="checkbox" id="chkFree">
+      <span>✓ Free only</span>
+    </label>
+
+    <label class="check-label">
+      <input type="checkbox" id="chkPaywall">
+      <span>🔒 Paywall only</span>
+    </label>
+  </div>
+
+</div>
+
+<div class="body">
+  <div id="status" class="status"></div>
+  <div id="results">
+    <div class="loading"><div class="spinner"></div><p>Loading resources&#8230;</p></div>
+  </div>
+</div>
+
+<script>
+var DATA_URL = "https://davidl0914.github.io/resource-data/resources.json";
+
+var allResources = [];   // raw objects straight from the JSON file
+var dataLoaded = false;
+
+// Load data
+window.addEventListener("load", loadData);
+
+function loadData() {
+  document.getElementById("results").innerHTML =
+    '<div class="loading"><div class="spinner"></div><p>Loading resources&#8230;</p></div>';
+
+  fetch(DATA_URL)
+    .then(function (res) {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    })
+    .then(function (data) {
+
+      // Handle array or JSON string
+      if (typeof data === "string") {
+        data = JSON.parse(data);
+      }
+      allResources = Array.isArray(data) ? data : [];
+      dataLoaded = true;
+      populateSponsors();
+      runSearch();
+    })
+    .catch(function (err) {
+      handleError(err.message || err);
+    });
+}
+
+function populateSponsors() {
+  var sponsors = {};
+  allResources.forEach(function (r) {
+    var s = (r["Sponsor/Group"] || "").toString().trim();
+    if (s) sponsors[s] = true;
+  });
+
+  var sorted = Object.keys(sponsors).sort(function (a, b) {
+    return a.toLowerCase().localeCompare(b.toLowerCase());
+  });
+
+  var sel = document.getElementById("sponsor");
+
+  // Clear out everything except the "All Sponsors" option
+  sel.innerHTML = '<option value="">All Sponsors</option>';
+  sorted.forEach(function (s) {
+    var o = document.createElement("option");
+    o.value = s;
+    o.textContent = s;
+    sel.appendChild(o);
+  });
+}
+
+document.getElementById("chkFree").addEventListener("change", runSearch);
+document.getElementById("chkPaywall").addEventListener("change", runSearch);
+document.getElementById("type").addEventListener("change", runSearch);
+document.getElementById("sponsor").addEventListener("change", runSearch);
+
+function badgeClass(type) {
+  return "badge-" + (type || "").replace(/\//g, "").replace(/\s+/g, "-");
+}
+
+function paywallBadge(val) {
+  if (val === "" || val === null || val === undefined) return "";
+  var v = val.toString().trim().toLowerCase();
+  if (v === "yes" || v === "true" || v === "y")
+    return '<span class="paywall-badge paywall-yes">&#128274; Paywall</span>';
+  if (v === "no" || v === "false" || v === "n" || v === "free")
+    return '<span class="paywall-badge paywall-no">&#10003; Free</span>';
+  return '<span class="paywall-badge paywall-no">' + val + '</span>';
+}
+
+// Convert date number to a readable date
+function formatDate(val) {
+  if (val === "" || val === null || val === undefined) return "";
+  if (typeof val === "number") {
+    if (val < 10000) return String(val);
+    var ms = Math.round((val - 25569) * 86400 * 1000);
+    var d = new Date(ms);
+    if (isNaN(d.getTime())) return String(val);
+    return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+  }
+  return String(val).trim();
+}
+
+function buildMeta(r) {
+  var fields = [
+    ["Sponsor",        r.sponsor],
+    ["Authors",        r.authors],
+    ["Publication",    r.publication],
+    ["Podcast",        r.podcastTitle],
+    ["Webinar Series", r.webinarSeries],
+    ["Date",           formatDate(r.date)],
+    ["Location",       r.location],
+    ["Price",          r.price]
+  ];
+  var html = "";
+  for (var i = 0; i < fields.length; i++) {
+    if (fields[i][1] && fields[i][1].toString().trim()) {
+      html += '<div class="meta-label">' + fields[i][0] + '</div>' +
+              '<div class="meta-value">' + fields[i][1] + '</div>';
+    }
+  }
+  return html ? '<div class="meta-grid">' + html + '</div>' : "";
+}
+
+function buildTags(tagStr) {
+  if (!tagStr) return "";
+  var parts = tagStr.toString().split(/[,;]+/);
+  var html = '<div class="tags-row">';
+  for (var i = 0; i < parts.length; i++) {
+    var t = parts[i].trim();
+    if (!t) continue;
+    html += '<span class="tag">#' + t + '</span>';
+  }
+  html += '</div>';
+  return html;
+}
+
+// Changing raw JSON into proper formatting
+function normalize(raw) {
+  return {
+    type:          raw["Resource Type"] || "",
+    sponsor:       raw["Sponsor/Group"] || "",
+    title:         raw["Title"] || "",
+    url:           raw["URL"] || "",
+    paywall:       raw["Paywall"],
+    webinarSeries: raw["Webinar Series Title"] || "",
+    publication:   raw["Publication"] || "",
+    podcastTitle:  raw["Podcast Title"] || "",
+    description:   raw["Description"] || "",
+    date:          raw["Date"],
+    location:      raw["Location"] || "",
+    price:         raw["Price"] || "",
+    tags:          raw["Topic Tags"] || "",
+    authors:       raw["Author(s)"] || ""
+  };
+}
+
+function runSearch() {
+  if (!dataLoaded) return;
+
+  var keyword = document.getElementById("keyword").value.trim().toLowerCase();
+  var type    = document.getElementById("type").value;
+  var sponsor = document.getElementById("sponsor").value;
+
+  var chkFree    = document.getElementById("chkFree").checked;
+  var chkPaywall = document.getElementById("chkPaywall").checked;
+
+  var paywallFilter = "";
+  if (chkFree && !chkPaywall)    paywallFilter = "free";
+  if (chkPaywall && !chkFree)    paywallFilter = "paywall";
+
+  var btn       = document.getElementById("searchBtn");
+  var container = document.getElementById("results");
+
+  btn.disabled    = true;
+  btn.textContent = "Searching\u2026";
+  container.innerHTML =
+    '<div class="loading"><div class="spinner"></div><p>Searching resources\u2026</p></div>';
+
+  // Loading state
+  setTimeout(function () {
+    try {
+      var results = allResources
+        .map(normalize)
+        .filter(function (r) {
+          var fullText = [
+            r.type, r.sponsor, r.title, r.publication, r.podcastTitle,
+            r.description, r.location, r.tags, r.authors
+          ].join(" ").toLowerCase();
+
+          var keywordMatch = !keyword || fullText.indexOf(keyword) !== -1;
+          var typeMatch    = type === "All" || r.type === type;
+          var sponsorMatch = !sponsor || r.sponsor === sponsor;
+
+          var pwVal = (r.paywall === null || r.paywall === undefined)
+            ? "" : r.paywall.toString().trim().toLowerCase();
+
+          var paywallMatch = true;
+          if (paywallFilter === "free") {
+            paywallMatch = pwVal === "no" || pwVal === "false" || pwVal === "free" ||
+                           pwVal === "n"  || pwVal === "";
+          } else if (paywallFilter === "paywall") {
+            paywallMatch = pwVal === "yes" || pwVal === "true" || pwVal === "y";
+          }
+
+          return keywordMatch && typeMatch && sponsorMatch && paywallMatch;
+        });
+
+      showResults(results);
+    } catch (err) {
+      handleError(err.message || err);
+    }
+  }, 0);
+}
+
+function showResults(data) {
+  var container = document.getElementById("results");
+  var status    = document.getElementById("status");
+  var btn       = document.getElementById("searchBtn");
+
+  btn.disabled    = false;
+  btn.textContent = "Search";
+  status.textContent = data.length
+    ? data.length + " result" + (data.length === 1 ? "" : "s")
+    : "";
+
+  if (!data.length) {
+    container.innerHTML =
+      '<div class="empty-state"><span class="icon">&#128269;</span>' +
+      '<p>No resources matched.<br>Try different filters.</p></div>';
+    return;
+  }
+
+  var html = "";
+  for (var i = 0; i < data.length; i++) {
+    var r = data[i];
+    html += '<div class="card" style="animation-delay:' + (i * 25) + 'ms">' +
+      '<div class="card-top">' +
+        '<span class="type-badge ' + badgeClass(r.type) + '">' + r.type + '</span>' +
+        (r.paywall !== "" && r.paywall !== null && r.paywall !== undefined ? paywallBadge(r.paywall) : "") +
+      '</div>' +
+      '<div class="card-title">' +
+        (r.url
+          ? '<a href="' + r.url + '" target="_blank" rel="noopener">' + (r.title || "Untitled") + '</a>'
+          : (r.title || "Untitled")) +
+      '</div>' +
+      buildMeta(r) +
+      (r.description ? '<div class="description">' + r.description + '</div>' : "") +
+      buildTags(r.tags) +
+      (r.url ? '<a class="open-btn" href="' + r.url + '" target="_blank" rel="noopener">Open &#8599;</a>' : "") +
+    '</div>';
+  }
+  container.innerHTML = html;
+}
+
+function handleError(err) {
+  var btn = document.getElementById("searchBtn");
+  btn.disabled    = false;
+  btn.textContent = "Search";
+  document.getElementById("results").innerHTML =
+    '<div class="empty-state"><span class="icon">&#9888;</span>' +
+    '<p>Something went wrong loading resources.<br><small style="color:#aaa">' + err + '</small></p></div>';
+}
+
+var searchTimer;
+document.getElementById("keyword").addEventListener("input", function () {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(runSearch, 300);
+});
+</script>
+</body>
+</html>
